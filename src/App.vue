@@ -1,13 +1,27 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view></router-view>
+    <mu-appbar title="3D云打印">
+      <!-- <mu-icon-button icon="menu" slot="left"/> -->
+      <mu-flat-button to="/login" label="login" slot="right"/>
+      <mu-flat-button to="/" label="首页" slot="left"/>
+      <mu-flat-button to="/print" label="打印" slot="left"/>
+      <mu-flat-button to="/check" label="查看" slot="left"/>
+      <!-- <mu-flat-button href="333" label="expand_more" slot="right"/> -->
+      <!-- <mu-icon-button icon="expand_more" slot="right"/> -->
+    </mu-appbar>
+    <transition name="fade">
+      <router-view class="wrap"></router-view>
+    </transition>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'app'
+  name: 'app',
+  data () {
+    return {
+    }
+  }
 }
 </script>
 
@@ -18,6 +32,30 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  margin: 0; padding: 0;
+}
+
+a,a:hover{
+  text-decoration:none;
+  color:#333;
+}
+
+.wrap {
+  position: absolute;
+  width: 100%;
+  top: 72px;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+.fade-enter, .fade-leave-active {
+  opacity: 0
 }
 </style>
