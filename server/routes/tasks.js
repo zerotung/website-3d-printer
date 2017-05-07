@@ -5,9 +5,9 @@ var fs = require('fs');
 /* GET users listing. */
 router.route('/')
   .get(function(req, res, next) {
-    var username = req.query.username;
-    var password = req.query.password;
-    fs.readFile('./public/data/user.json', function(err, data) {
+    var type = req.query.type;
+    var val = req.query.val;
+    fs.readFile('./public/data/task.json', function(err, data) {
       if (err) {
         return res.send({
           status: 0,
@@ -24,32 +24,23 @@ router.route('/')
         })
         obj = [];
       }
-      userFind = obj.find(p => p.username === username);
-      if (!userFind || userFind.password !== password) {
-        return res.send({
-          status: 0,
-          info: '用户名或密码出错'
-        })
-      }
+      tasks = obj.filter(p => p[type] === val);
       return res.send({
         status: 1,
-        data: {
-          username: userFind.username,
-          nickname: userFind.nickname
-        }
+        data: tasks
       })
     })
   })
   .post(function(req, res, next) {
     var username = req.body.username || '';
-    var password = req.body.password || '';
-    if (!username || !password) {
+    var task = req.body.task || '';
+    if (!username || !task) {
       return res.send({
         status: 0,
         info: '字段缺失'
       })
     }
-    fs.readFile('./public/data/user.json', function(err, data) {
+    fs.readFile('./public/data/task.json', function(err, data) {
       if (err) {
         return res.send({
           status: 0,
@@ -66,22 +57,15 @@ router.route('/')
         })
         obj = [];
       }
-      var userFind = obj.find(q => {
-        return q.username === username
-      });
-      if (userFind) {
-        return res.send({
-          status: 0,
-          info: '用户已存在'
-        })
-      }
-      obj.push({
+      newObj = {
+        id: guidGenerator(),
+        task,
         username: username,
-        password: password,
-        nickname: ''
-      });
+        state: 'unchecked'
+      };
+      obj.push(newObj);
       var newData = JSON.stringify(obj);
-      fs.writeFile('./public/data/user.json', newData, function(err) {
+      fs.writeFile('./public/data/task.json', newData, function(err) {
         if (err) {
           return res.send({
             status: 0,
@@ -90,14 +74,19 @@ router.route('/')
         }
         return res.send({
           status: 1,
-          info: {
-            username: username,
-            nickname: '请修改您的昵称'
-          }
+          data: newObj
         });
       });
     })
 
   })
+
+function guidGenerator(){
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0,
+      v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+  }).toUpperCase();
+}
 
 module.exports = router;

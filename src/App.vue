@@ -2,7 +2,26 @@
   <div id="app">
     <mu-appbar title="3D云打印">
       <!-- <mu-icon-button icon="menu" slot="left"/> -->
-      <mu-flat-button to="/login" label="login" slot="right"/>
+
+      <mu-flat-button v-show="user"
+          :label="user ? (`${user.nickname ? user.nickname : '请修改昵称'}(${user.username})`) : ''"
+          slot="right"
+          ref="button"
+          @click="toggle"/>
+      <mu-flat-button v-if="!user"
+        label="login"
+        to="/login"
+        slot="right"/>
+      <mu-popover
+        :trigger="trigger" :open="open"
+        @close="handleClose"
+        :anchorOrigin="{vertical:'bottom',horizontal:'right'}"
+        :targetOrigin="{vertical:'top',horizontal:'right'}">
+        <mu-menu>
+          <mu-menu-item v-if="!user.nickname" title="修改昵称" />
+          <mu-menu-item title="Log Out" />
+        </mu-menu>
+      </mu-popover>
       <mu-flat-button to="/" label="首页" slot="left"/>
       <mu-flat-button to="/print" label="打印" slot="left"/>
       <mu-flat-button to="/check" label="查看" slot="left"/>
@@ -16,10 +35,31 @@
 </template>
 
 <script>
+import store from './store'
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'app',
+  store,
   data () {
     return {
+      open: false,
+      trigger: null
+    }
+  },
+  computed: {
+    ...mapGetters(['user'])
+  },
+  mounted () {
+    console.log(this.$refs)
+    this.trigger = this.$refs.button.$el
+  },
+  methods: {
+    toggle () {
+      this.open = !this.open
+    },
+    handleClose (e) {
+      this.open = false
     }
   }
 }

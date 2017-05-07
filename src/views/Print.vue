@@ -25,22 +25,25 @@
           <mu-paper>
             <mu-card-title :title="cardTitle" subTitle="Content Title"/>
             <div class="step-wrap" v-show="activeStep === 0">
-              <mu-raised-button class="demo-raised-button" label="点此上传打印文件" labelPosition="before" icon="folder" primary fullWidth/><br>
-              <mu-text-field v-model="fillingRate" label="填充率" hintText="百分比" type="number" fullWidth/><br/>
-              <mu-text-field v-model="storyHeight" label="层高" hintText="单位：毫米" type="number" fullWidth/><br/>
-              <mu-select-field v-model="structure" :labelFocusClass="['label-foucs']" label="填充结构" fullWidth>
-                <mu-menu-item v-for="text,index in list" :key="index" :value="index" :title="text" />
-              </mu-select-field>
+              <form>
+                
+                <mu-raised-button type="file" class="demo-raised-button" label="点此上传打印文件" labelPosition="before" icon="folder" primary fullWidth/><br>
+                <mu-text-field v-model="fillingRate" label="填充率" hintText="百分比" type="number" fullWidth/><br/>
+                <mu-text-field v-model="storyHeight" label="层高" hintText="单位：毫米" type="number" fullWidth/><br/>
+                <mu-select-field v-model="structure" :labelFocusClass="['label-foucs']" label="填充结构" fullWidth>
+                  <mu-menu-item v-for="text,index in list" :key="index" :value="index" :title="text" />
+                </mu-select-field>
+              </form>
             </div>
             <div class="step-wrap" v-show="activeStep === 1">
               <mu-list>
                 <mu-list-item :inset="false" title="打印文件已上传">
                 </mu-list-item>
-                <mu-list-item :inset="false" :title="'填充率：' + fillingRate + '%'">
+                <mu-list-item :inset="false" :title="'填充率：' + task.fillingRate + '%'">
                 </mu-list-item>
-                <mu-list-item :inset="false" :title="'层高：' + storyHeight + 'mm'">
+                <mu-list-item :inset="false" :title="'层高：' + task.storyHeight + 'mm'">
                 </mu-list-item>
-                <mu-list-item :inset="false" :title="'填充结构：' + list[structure]">
+                <mu-list-item :inset="false" :title="'填充结构：' + task.structure">
                 </mu-list-item>
               </mu-list>
             </div>
@@ -57,6 +60,9 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+import router from '../router/index.js'
+
 export default {
   data () {
     return {
@@ -78,6 +84,17 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      task: 'filledTask',
+      user: 'user'
+    }),
+    inputTask () {
+      return {
+        fillingRate: this.fillingRate,
+        storyHeight: this.storyHeight,
+        structure: this.list[this.structure]
+      }
+    },
     cardTitle () {
       let message = ''
       switch (this.activeStep) {
@@ -98,6 +115,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['fillingTask', 'applyForPrint']),
     handleNext () {
       if (!this.fillingRate || !this.storyHeight) {
         this.dialog = true
@@ -112,8 +130,16 @@ export default {
       this.activeStep = index
     },
     submit () {
-      this.topPopupTitle = '提交成功！'
-      this.topPopup = true
+      if (this.user) {
+        this.applyForPrint(this.user.username).then(() => {
+          this.topPopupTitle = '提交成功！'
+          this.topPopup = true
+        })
+      } else {
+        router.push({
+          name: 'Login'
+        })
+      }
     },
     close () {
       this.dialog = false
@@ -126,7 +152,22 @@ export default {
           this.topPopup = false
         }, 2000)
       }
+    },
+    inputTask (val) {
+      this.fillingTask(val)
     }
+  },
+  created () {
+    this.fillingRate = this.task.fillingRate
+    this.storyHeight = this.task.storyHeight
+    for (var index in this.list) {
+      console.log(this.list[index], this.list[index] === this.task.structure, index)
+      if (this.list[index] === this.task.structure) {
+        this.structure = index - 0
+        break
+      }
+    }
+    // this.structure = this.list.find(p => p === this.task.structure)
   }
 }
 </script>
