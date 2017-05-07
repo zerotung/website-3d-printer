@@ -59,6 +59,9 @@ const actions = {
     .catch(function (response) {
       alert('注册失败，请检查您的网络')
     })
+  },
+  logout ({ commit }) {
+    commit('clearUser')
   }
 }
 
@@ -86,6 +89,9 @@ const mutations = {
   signinError (state, info) {
     state.info = info
     state.state = 'SigninError'
+  },
+  clearUser (state) {
+    state.user = null
   }
 }
 

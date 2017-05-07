@@ -18,8 +18,8 @@
         :anchorOrigin="{vertical:'bottom',horizontal:'right'}"
         :targetOrigin="{vertical:'top',horizontal:'right'}">
         <mu-menu>
-          <mu-menu-item v-if="!user.nickname" title="修改昵称" />
-          <mu-menu-item title="Log Out" />
+          <mu-menu-item v-if="user ? (user.nickname?false:true) : false" title="修改昵称" />
+          <mu-menu-item title="Log Out" @click="logoutClicked"/>
         </mu-menu>
       </mu-popover>
       <mu-flat-button to="/" label="首页" slot="left"/>
@@ -36,7 +36,7 @@
 
 <script>
 import store from './store'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'app',
@@ -55,11 +55,16 @@ export default {
     this.trigger = this.$refs.button.$el
   },
   methods: {
+    ...mapActions(['logout']),
     toggle () {
       this.open = !this.open
     },
     handleClose (e) {
       this.open = false
+    },
+    logoutClicked () {
+      this.handleClose()
+      this.logout()
     }
   }
 }
