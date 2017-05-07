@@ -62,6 +62,51 @@ const actions = {
   },
   logout ({ commit }) {
     commit('clearUser')
+  },
+  changePassword ({ commit }, {
+    username,
+    password,
+    newPassword
+  }) {
+    axios.post('/users/password', {
+      username: username,
+      password: password,
+      newPassword: newPassword
+    })
+    .then(function (response) {
+      if (response.data.status === 1) {
+        alert('修改成功')
+      } else {
+        alert(response.data.info)
+      }
+    })
+    .catch(function (response) {
+      alert('注册失败，请检查您的网络')
+    })
+  },
+  changeNickname ({ commit }, {
+    username,
+    newNickname
+  }) {
+    axios.post('/users/nickname', {
+      username: username,
+      newNickname: newNickname
+    })
+    .then(function (response) {
+      if (response.data.status === 1) {
+        let newUser = {
+          username: state.user.username,
+          nickname: response.data.data.nickname
+        }
+        commit('changeUser', newUser)
+        alert('修改成功')
+      } else {
+        alert(response.data.info)
+      }
+    })
+    .catch(function (response) {
+      alert('注册失败，请检查您的网络')
+    })
   }
 }
 

@@ -18,10 +18,22 @@
         :anchorOrigin="{vertical:'bottom',horizontal:'right'}"
         :targetOrigin="{vertical:'top',horizontal:'right'}">
         <mu-menu>
-          <mu-menu-item v-if="user ? (user.nickname?false:true) : false" title="修改昵称" />
+          <mu-menu-item title="修改昵称" @click="changeNicknameClicked"/>
+          <mu-menu-item title="修改密码" @click="changePasswordClicked"/>
           <mu-menu-item title="Log Out" @click="logoutClicked"/>
         </mu-menu>
       </mu-popover>
+      <mu-dialog :open="changePasswordDialog" title="修改密码" @close="closePasswordDialog">
+        <mu-text-field v-model="password" label="请输入原始密码" type="password" labelFloat/><br/>
+        <mu-text-field v-model="newPassword" label="请输入新密码" type="password" labelFloat/><br/>
+        <mu-flat-button slot="actions" @click="closePasswordDialog" primary label="取消"/>
+        <mu-flat-button slot="actions" primary @click="changePasswordCofirmed" label="确定"/>
+      </mu-dialog>
+      <mu-dialog :open="changeNicknameDialog" title="修改昵称" @close="closeNicknameDialog">
+        <mu-text-field v-model="newNickname" label="请输入新昵称" labelFloat/><br/>
+        <mu-flat-button slot="actions" @click="closeNicknameDialog" primary label="取消"/>
+        <mu-flat-button slot="actions" primary @click="changeNicknameCofirmed" label="确定"/>
+      </mu-dialog>
       <mu-flat-button to="/" label="首页" slot="left"/>
       <mu-flat-button to="/print" label="打印" slot="left"/>
       <mu-flat-button to="/check" label="查看" slot="left"/>
@@ -44,7 +56,12 @@ export default {
   data () {
     return {
       open: false,
-      trigger: null
+      trigger: null,
+      password: '',
+      newPassword: '',
+      newNickname: '',
+      changePasswordDialog: false,
+      changeNicknameDialog: false
     }
   },
   computed: {
@@ -55,7 +72,7 @@ export default {
     this.trigger = this.$refs.button.$el
   },
   methods: {
-    ...mapActions(['logout']),
+    ...mapActions(['logout', 'changePassword', 'changeNickname']),
     toggle () {
       this.open = !this.open
     },
@@ -65,6 +82,38 @@ export default {
     logoutClicked () {
       this.handleClose()
       this.logout()
+    },
+    changePasswordClicked () {
+      this.changePasswordDialog = true
+    },
+    changeNicknameClicked () {
+      this.changeNicknameDialog = true
+    },
+    changePasswordCofirmed () {
+      this.changePassword({
+        username: this.user.username,
+        password: this.password,
+        newPassword: this.newPassword
+      }).then(() => {
+        this.password = ''
+        this.newPassword = ''
+        this.closePasswordDialog()
+      })
+    },
+    changeNicknameCofirmed () {
+      this.changeNickname({
+        username: this.user.username,
+        newNickname: this.newNickname
+      }).then(() => {
+        this.newNickname = ''
+        this.closeNicknameDialog()
+      })
+    },
+    closePasswordDialog () {
+      this.changePasswordDialog = false
+    },
+    closeNicknameDialog () {
+      this.changeNicknameDialog = false
     }
   }
 }
