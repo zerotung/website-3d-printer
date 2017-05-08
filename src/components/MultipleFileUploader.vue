@@ -1,44 +1,43 @@
 <template>
-    <div class="uploadBox">
-        <h3>Add files</h3>
-        <form role="form" enctype="multipart/form-data" @submit.prevent="onSubmit">
-            <div class="uploadBoxMain" v-if="!itemsAdded">
-                <div class="form-group">
-                    <div class="dropArea" @ondragover="onChange">
-                        Drop multiple files here.
-                        <input type="file" id="items" name="items[]" required multiple @change="onChange">
-                        <p class="help-block">Space for your instructions</p>
-                    </div>
-                </div>
-            </div>
-            <div class="uploadBoxMain" v-else>
-                <p><strong>Names</strong></p>
-                <ol>
-                    <li v-for="name in itemsNames">{{name}}</li>
-                </ol>
-                <p><strong>Sizes</strong></p>
-                <ol>
-                    <li v-for="size in itemsSizes">{{size}}</li>
-                </ol>
-                <p><strong>Total files:</strong> {{itemsAdded}}</p>
-                <p><strong>Total upload size:</strong> {{itemsTotalSize}}</p>
-                <button @click="removeItems">Remove files</button>
-                <!-- Loader -->
-                <div class="loader" v-if="isLoaderVisible">
-                    <div class="loaderImg"></div>
-                </div>
-                <!-- End Loader -->
-            </div>
-            <div>
-                <button type="submit" class="btn btn-primary btn-black btn-round" :disabled="itemsAdded < minItems">Upload</button>
-                <button type="button" class="btn btn-default btn-round" @click="removeItems">Cancel</button>
-            </div>
-            <br>
-            <div class="successMsg" v-if="successMsg !== ''">{{successMsg}}</div>
-            <div class="errorMsg" v-if="errorMsg !== ''">An error has occurred:<br>{{errorMsg}}</div>
-            <div class="errorMsg" v-if="itemsAdded && itemsAdded < minItems">Minimum {{minItems}} files need to be added to uploader. Please remove files and try again.</div>
-        </form>
-    </div>
+  <div class="uploadBox">
+    <!-- <h3>模型上传</h3> -->
+    <form role="form" enctype="multipart/form-data" @submit.prevent="onSubmit">
+      <div class="uploadBoxMain" v-if="!itemsAdded">
+        <div class="form-group">
+          <div class="dropArea" @ondragover="onChange">
+            拖动文件到此处添加文件
+            <input type="file" id="items" name="items[]" required multiple @change="onChange">
+            <!-- <p class="help-block">Space for your instructions</p> -->
+          </div>
+        </div>
+      </div>
+      <div class="uploadBoxMain" v-else>
+        <mu-list>
+          <mu-sub-header>文件名</mu-sub-header>
+          <mu-list-item li v-for="name in itemsNames" :title="name"></mu-list-item>
+          <mu-sub-header>文件大小</mu-sub-header>
+          <mu-list-item v-for="size in itemsSizes" :title="size"></mu-list-item>
+          <!-- <mu-list-item :title="'总文件数：' + itemsAdded"></mu-list-item> -->
+          <!-- <mu-list-item :title="'总文件大小：' + itemsTotalSize"></mu-list-item> -->
+        </mu-list>
+        <!-- <mu-raised-button @click="removeItems">Remove files</mu-raised-button> -->
+
+        <!-- Loader -->
+        <div class="loader" v-if="isLoaderVisible">
+            <div class="loaderImg"></div>
+        </div>
+        <!-- End Loader -->
+      </div>
+      <div>
+        <mu-raised-button type="submit" primary :disabled="itemsAdded < minItems">Upload</mu-raised-button>
+        <mu-raised-button type="button" class="btn btn-default btn-round" @click="removeItems">Cancel</mu-raised-button>
+      </div>
+      <br>
+      <div class="successMsg" v-if="successMsg !== ''">{{successMsg}}</div>
+      <div class="errorMsg" v-if="errorMsg !== ''">An error has occurred:<br>{{errorMsg}}</div>
+      <div class="errorMsg" v-if="itemsAdded && itemsAdded < minItems">Minimum {{minItems}} files need to be added to uploader. Please remove files and try again.</div>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -163,7 +162,7 @@ export default {
 <style>
 .uploadBox {
     position: relative;
-    background: #eee;
+    /*background: #eee;*/
     padding: 0 1em 1em 1em;
     margin: 1em;
 }
