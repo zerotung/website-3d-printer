@@ -14,7 +14,7 @@
         <mu-tbody>
           <mu-tr v-for="item in allTasks" :key="item.id">
             <mu-td>{{item.id}}</mu-td>
-            <mu-td>{{item.task.title}}</mu-td>
+            <mu-td>{{item.title}}</mu-td>
             <mu-td>{{item.state}}</mu-td>
             <mu-td>
               <mu-icon-button icon="settings"/>

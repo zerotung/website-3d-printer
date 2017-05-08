@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
+var multiparty = require('multiparty');
+var util = require('util');
 
 /* GET users listing. */
 router.route('/')
@@ -32,9 +34,11 @@ router.route('/')
     })
   })
   .post(function(req, res, next) {
+    var id = req.body.id || '';
+    var title = req.body.title || '';
     var username = req.body.username || '';
     var task = req.body.task || '';
-    if (!username || !task) {
+    if (!username || !task || !id) {
       return res.send({
         status: 0,
         info: '字段缺失'
@@ -58,9 +62,10 @@ router.route('/')
         obj = [];
       }
       newObj = {
-        id: guidGenerator(),
+        id,
+        title,
         task,
-        username: username,
+        username,
         state: 'unchecked'
       };
       obj.push(newObj);
@@ -80,6 +85,43 @@ router.route('/')
     })
 
   })
+
+router.post('/file/uploading', function(req, res, next){
+  var title = '';
+  var id = guidGenerator();
+
+  //生成multiparty对象，并配置上传目标路径
+  var form = new multiparty.Form({uploadDir: './public/files/'});
+  //上传完成后处理
+  form.parse(req, function(err, fields, files) {
+    var filesTmp = JSON.stringify(files,null,2);
+
+    if(err){
+      console.log('parse error: ' + err);
+    } else {
+      console.log('parse files: ' + filesTmp);
+      var inputFile = files["items[]"][0];
+      var uploadedPath = inputFile.path;
+      var dstPath = './public/files/' + id + '.' + inputFile.originalFilename.split('.')[1];
+      title = inputFile.originalFilename;
+      //重命名为真实文件名
+      fs.rename(uploadedPath, dstPath, function(err) {
+        if(err){
+          console.log('rename error: ' + err);
+        } else {
+          console.log('rename ok');
+        }
+      });
+    }
+    return res.send({
+      status: 1,
+      data: {
+        id,
+        title
+      }
+    })
+  });
+});
 
 function guidGenerator(){
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

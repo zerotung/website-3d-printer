@@ -68,7 +68,6 @@ export default {
     ...mapGetters(['user'])
   },
   mounted () {
-    console.log(this.$refs)
     this.trigger = this.$refs.button.$el
   },
   methods: {

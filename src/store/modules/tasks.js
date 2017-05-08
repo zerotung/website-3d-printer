@@ -5,14 +5,16 @@ import axios from 'axios'
 const state = {
   all: [],
   selectedTask: {},
-  filledTask: {}
+  filledTask: {},
+  uploadFileInfo: {}
 }
 
 // getters
 const getters = {
   selectedTask: state => state.selectedTask,
   allTasks: state => state.all,
-  filledTask: state => state.filledTask
+  filledTask: state => state.filledTask,
+  uploadFileInfo: state => state.uploadFileInfo
 }
 
 // actions
@@ -24,6 +26,8 @@ const actions = {
   // 申请打印
   applyForPrint ({commit}, username) {
     axios.post('/tasks', {
+      id: state.uploadFileInfo.id,
+      title: state.uploadFileInfo.title,
       username: username,
       task: state.filledTask
     })
@@ -55,6 +59,12 @@ const actions = {
     .catch(function (response) {
       alert('注册失败，请检查您的网络')
     })
+  },
+  fileUploaded ({commit}, {
+    title,
+    id
+  }) {
+    commit('uploadFileChange', {title, id})
   }
 }
 
@@ -89,6 +99,9 @@ const mutations = {
   },
   addTask (state, task) {
     state.all.push(task)
+  },
+  uploadFileChange (state, fileInfo) {
+    state.uploadFileInfo = fileInfo
   }
 }
 
