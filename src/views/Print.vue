@@ -27,7 +27,7 @@
             <div class="step-wrap" v-show="activeStep === 0">
               <form>
                 <multiple-file-uploader postURL="/tasks/file/uploading" successMessagePath="上传成功" errorMessagePath=""></multiple-file-uploader>
-                <mu-raised-button type="file" class="demo-raised-button" label="点此上传打印文件" labelPosition="before" icon="folder" primary fullWidth/><br>
+                <!-- <mu-raised-button type="file" class="demo-raised-button" label="点此上传打印文件" labelPosition="before" icon="folder" primary fullWidth/><br> -->
                 <mu-text-field v-model="fillingRate" label="填充率" hintText="百分比" type="number" fullWidth/><br/>
                 <mu-text-field v-model="storyHeight" label="层高" hintText="单位：毫米" type="number" fullWidth/><br/>
                 <mu-select-field v-model="structure" :labelFocusClass="['label-foucs']" label="填充结构" fullWidth>

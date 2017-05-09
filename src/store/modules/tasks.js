@@ -57,7 +57,7 @@ const actions = {
       }
     })
     .catch(function (response) {
-      alert('注册失败，请检查您的网络')
+      console.log('注册失败，请检查您的网络')
     })
   },
   fileUploaded ({commit}, {
@@ -65,6 +65,26 @@ const actions = {
     id
   }) {
     commit('uploadFileChange', {title, id})
+  },
+  selectTask ({commit}, id) {
+    commit('selectNewTask', id)
+  },
+  editTask ({commit}) {
+    axios.post('/tasks/edit', {
+      id: state.selectedTask.id,
+      task: state.filledTask
+    })
+    .then(function (response) {
+      if (response.data.status === 1) {
+        commit('editAllTask')
+      }
+    })
+    .catch(function (response) {
+      console.log('注册失败，请检查您的网络')
+    })
+  },
+  cleanTask ({commit}) {
+    commit('cleanTask')
   }
 }
 
@@ -73,26 +93,10 @@ const mutations = {
   filledTaskChange (state, task) {
     state.filledTask = task
   },
-  editTask (state, {
-    id
-  }) {
-    state.lastCheckout = null
-    // const record = state.all.find(p => p.id === id)
-    // if (!record) {
-    //   state.added.push({
-    //     id,
-    //     quantity: 1
-    //   })
-    // } else {
-    //   record.quantity++
-    // }
-  },
-
-  selectTask (state, {
-    taskId
-  }) {
+  selectNewTask (state, taskId) {
+    console.log(taskId)
     const record = state.all.find(p => p.id === taskId)
-    state.selectTask = record
+    state.selectedTask = record
   },
   initTask (state, tasks) {
     state.all = tasks
@@ -102,6 +106,15 @@ const mutations = {
   },
   uploadFileChange (state, fileInfo) {
     state.uploadFileInfo = fileInfo
+  },
+  editAllTask (state) {
+    var findTask = state.all.find(p => p.id === state.selectedTask.id)
+    findTask.task = state.fillingTask
+    this.cleanTask
+  },
+  cleanTask (state) {
+    state.selectedTask = {}
+    state.filledTask = {}
   }
 }
 

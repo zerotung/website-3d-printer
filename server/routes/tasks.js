@@ -61,14 +61,19 @@ router.route('/')
         })
         obj = [];
       }
-      newObj = {
-        id,
-        title,
-        task,
-        username,
-        state: 'unchecked'
-      };
-      obj.push(newObj);
+      var findObj = obj.find(p => p.id === id);
+      if (findObj) {
+        findObj.task = task
+      } else {
+        var newObj = {
+          id,
+          title,
+          task,
+          username,
+          state: 'unchecked'
+        };
+        obj.push(newObj);
+      }
       var newData = JSON.stringify(obj);
       fs.writeFile('./public/data/task.json', newData, function(err) {
         if (err) {
@@ -80,6 +85,58 @@ router.route('/')
         return res.send({
           status: 1,
           data: newObj
+        });
+      });
+    })
+  })
+
+router.route('/edit')
+  .post(function(req, res, next) {
+    var id = req.body.id || '';
+    var task = req.body.task || '';
+    if (!task || !id) {
+      return res.send({
+        status: 0,
+        info: '字段缺失'
+      })
+    }
+    fs.readFile('./public/data/task.json', function(err, data) {
+      if (err) {
+        return res.send({
+          status: 0,
+          info: '读取文件出现异常'
+        })
+      }
+      var obj = [];
+      try {
+        obj = JSON.parse(data.toString());
+      } catch (e) {
+        return res.send({
+          status: 0,
+          info: 'parse error'
+        })
+        obj = [];
+      }
+      var findObj = obj.find(p => p.id === id);
+      if (findObj) {
+        findObj.task = task
+      } else {
+        return res.send({
+          status: 0,
+          info: '未找到对应id'
+        })
+      }
+      var newData = JSON.stringify(obj);
+      fs.writeFile('./public/data/task.json', newData, function(err) {
+        if (err) {
+          return res.send({
+            status: 0,
+            info: '写入json文件出错'
+          });
+        }
+        return res.send({
+          status: 1,
+          data: findObj
         });
       });
     })
