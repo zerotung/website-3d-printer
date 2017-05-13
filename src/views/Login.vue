@@ -51,12 +51,21 @@ export default {
   watch: {
     loginState () {
       if (this.loginState === 'loginSuccess') {
-        this.fetchTask({
-          type: 'username',
-          val: this.user.username
-        }).then(() => {
+        if (this.user.username === 'admin') {
+          console.log('fetchAll')
+          this.fetchTask({
+            type: 'all',
+            val: this.user.username
+          })
+          router.push({name: 'Admin'})
+        } else {
+          console.log('fetch' + this.user.username)
+          this.fetchTask({
+            type: 'username',
+            val: this.user.username
+          })
           router.push({name: 'Index'})
-        })
+        }
       }
     },
     topPopup (val) {

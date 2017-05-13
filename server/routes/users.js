@@ -100,6 +100,37 @@ router.route('/')
 
   })
 
+router.route('/list')
+  .get(function(req, res, next) {
+    fs.readFile('./public/data/user.json', function(err, data) {
+      if (err) {
+        return res.send({
+          status: 0,
+          info: '读取文件出现异常'
+        })
+      }
+      var obj = [];
+      try {
+        obj = JSON.parse(data.toString());
+      } catch (e) {
+        return res.send({
+          status: 0,
+          info: 'parse error'
+        })
+        obj = [];
+      }
+      newObj = [];
+      obj.map(p => {
+        delete p.password;
+      })
+      var newData = obj;
+      return res.send({
+        status: 1,
+        data: newData
+      });
+    })
+  })
+
 router.route('/password')
   .post(function(req, res, next) {
     var username = req.body.username || '';

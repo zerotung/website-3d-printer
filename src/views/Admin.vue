@@ -1,10 +1,25 @@
 <template>
 <div>
-  <div class="admin-wrap">
+  <div v-if="user" class="admin-wrap">
     <mu-dialog :open="dialog" title="审核任务" @close="close">
-      {{waitingPicked.title}}
+      {{taskPicked.title}}
+      <mu-list>
+        <mu-list-item>填充率：{{taskPicked.task.fillingRate}}%</mu-list-item>
+        <mu-list-item>层高：{{taskPicked.task.storyHeight}}mm</mu-list-item>
+        <mu-list-item>填充结构：{{taskPicked.task.structure}}</mu-list-item>
+      </mu-list>
       <mu-flat-button slot="actions" @click="close" primary label="取消"/>
-      <mu-flat-button slot="actions" primary @click="close" label="确定"/>
+      <mu-flat-button slot="actions" primary @click="confirmCheck" label="审核通过"/>
+    </mu-dialog>
+    <mu-dialog :open="dialogPrint" title="打印任务" @close="closePrint">
+      {{taskPicked.title}}
+      <mu-list>
+        <mu-list-item>填充率：{{taskPicked.task.fillingRate}}%</mu-list-item>
+        <mu-list-item>层高：{{taskPicked.task.storyHeight}}mm</mu-list-item>
+        <mu-list-item>填充结构：{{taskPicked.task.structure}}</mu-list-item>
+      </mu-list>
+      <mu-flat-button slot="actions" @click="closePrint" primary label="取消"/>
+      <mu-flat-button slot="actions" primary @click="confirmPrint" label="确定打印"/>
     </mu-dialog>
     <mu-popup position="right" popupClass="demo-popup-right" :open="rightPopup" @close="closePopRight()">
         <h1>发消息给：{{userPicked.name}}</h1>
@@ -24,7 +39,7 @@
         <mu-flexbox-item class="flex-demo">
           <mu-list>
             <mu-sub-header>待审核的任务</mu-sub-header>
-            <mu-list-item v-for="item in waiting" :key="item.title + 'waiting'" :title="item.title" @click="open(item.title)">
+            <mu-list-item v-if="item.state === 'unchecked'" v-for="item in allTasks" :key="item.title + 'waiting'" :title="item.title" @click="open(item.id)">
               <mu-icon slot="right" value="arrow_right"/>
             </mu-list-item>
           </mu-list>
@@ -32,8 +47,8 @@
         <mu-flexbox-item class="flex-demo">
           <mu-sub-header>任务队列</mu-sub-header>
           <mu-list>
-            <mu-list-item v-for="item in queue" :key="item.title + 'queue'" :title="item.title">
-              <mu-icon slot="right" value="menu"/>
+            <mu-list-item v-if="item.state === 'checked'" v-for="item in allTasks" :key="item.title + 'queue'" :title="item.title" @click="openPrint(item.id)">
+              <mu-icon slot="right" value="print"/>
             </mu-list-item>
           </mu-list>
         </mu-flexbox-item>
@@ -53,11 +68,11 @@
             </mu-tr>
           </mu-thead>
           <mu-tbody>
-            <mu-tr v-for="user in userData" :key="user.id">
-              <mu-td>{{user.id}}</mu-td>
-              <mu-td>{{user.name}}</mu-td>
+            <mu-tr v-for="user in userList" :key="user.username">
+              <mu-td>{{user.username}}</mu-td>
+              <mu-td>{{user.nickname}}</mu-td>
               <mu-td>
-                {{user.permission == 0 ? '普通用户' : '管理员'}}
+                {{user.username == 'admin' ? '管理员' : '普通用户'}}
                 <mu-flat-button label="编辑" labelPosition="before" icon="edit"/>
               </mu-td>
               <mu-td>
@@ -71,10 +86,16 @@
       </mu-paper>
     </div>
   </div>
+  <mu-paper v-else :style="{width:'1000px',margin:'20px auto'}">
+    <h1>请先登录</h1>
+  </mu-paper>
 </div>
 </template>
 
 <script>
+import axios from 'axios'
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   data () {
     return {
@@ -83,87 +104,30 @@ export default {
       total: 500,
       current: 1,
       dialog: false,
+      dialogPrint: false,
       sendMsgText: '',
-      waitingPicked: {
-        id: 1,
-        name: 'John Smith',
-        permission: '0'
+      taskPicked: {
+        id: '',
+        title: '',
+        task: {
+          fillingRate: '',
+          storyHeight: '',
+          structure: ''
+        }
       },
       userPicked: {
         id: 1,
         name: 'John Smith',
         permission: '0'
       },
-      userData: [{
-        id: 1,
-        name: 'John Smith',
-        permission: '0'
-      }, {
-        id: 2,
-        name: 'Randal White',
-        permission: '0'
-      }, {
-        id: 3,
-        name: 'Stephanie Sanders',
-        permission: '1'
-      }, {
-        id: 4,
-        name: 'Steve Brown',
-        permission: '0'
-      }, {
-        id: 5,
-        name: 'Stephanie Sanders',
-        permission: '1'
-      }, {
-        id: 6,
-        name: 'Steve Brown',
-        permission: '0'
-      }],
-      waiting: [{
-        title: 'abcdefg1',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }, {
-        title: 'abcdefg2',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }, {
-        title: 'abcdefg3',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }, {
-        title: 'abcdefg4',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }],
-      queue: [{
-        title: 'abcdefg5',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }, {
-        title: 'abcdefg6',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }, {
-        title: 'abcdefg7',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }, {
-        title: 'abcdefg8',
-        fillingRate: '20',
-        storyHeight: '30',
-        structure: '3'
-      }]
+      userList: []
     }
   },
+  computed: {
+    ...mapGetters(['user', 'allTasks'])
+  },
   methods: {
+    ...mapActions(['editTask']),
     handleTabChange (val) {
       this.activeTab = val
     },
@@ -172,13 +136,15 @@ export default {
     },
     handleClick (newIndex) {
     },
-    open (title) {
-      for (var waitingTask in this.waiting) {
-        if (waitingTask.title === title) {
-          this.waitingPicked = waitingTask
-        }
-      }
+    open (id) {
+      let obj = this.allTasks.find(p => p.id === id)
+      this.taskPicked = obj
       this.dialog = true
+    },
+    openPrint (id) {
+      let obj = this.allTasks.find(p => p.id === id)
+      this.taskPicked = obj
+      this.dialogPrint = true
     },
     openPopup (userId) {
       console.log(userId)
@@ -199,9 +165,37 @@ export default {
     close () {
       this.dialog = false
     },
+    closePrint () {
+      this.dialogPrint = false
+    },
     closePopRight () {
       this.rightPopup = false
+    },
+    confirmCheck () {
+      this.taskPicked.state = 'checked'
+      this.editTask(this.taskPicked)
+      this.close()
+    },
+    confirmPrint () {
+      this.taskPicked.state = 'printed'
+      this.editTask(this.taskPicked)
+      this.closePrint()
+    },
+    fetchUserList () {
+      axios.get('/users/list', {})
+      .then((response) => {
+        if (response.data.status === 1) {
+          this.userList = response.data.data
+          // console.log(this.userList)
+        }
+      })
+      .catch(function (response) {
+        console.log('获取用户列表失败')
+      })
     }
+  },
+  mounted () {
+    this.fetchUserList()
   }
 }
 </script>

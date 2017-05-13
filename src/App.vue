@@ -37,6 +37,7 @@
       <mu-flat-button to="/" label="首页" slot="left"/>
       <mu-flat-button to="/print" label="打印" slot="left"/>
       <mu-flat-button to="/check" label="查看" slot="left"/>
+      <mu-flat-button v-if="user && user.username === 'admin'" to="/admin" label="管理" slot="left"/>
       <!-- <mu-flat-button href="333" label="expand_more" slot="right"/> -->
       <!-- <mu-icon-button icon="expand_more" slot="right"/> -->
     </mu-appbar>

@@ -69,19 +69,34 @@ const actions = {
   selectTask ({commit}, id) {
     commit('selectNewTask', id)
   },
-  editTask ({commit}) {
-    axios.post('/tasks/edit', {
-      id: state.selectedTask.id,
-      task: state.filledTask
-    })
-    .then(function (response) {
-      if (response.data.status === 1) {
-        commit('editAllTask')
-      }
-    })
-    .catch(function (response) {
-      console.log('注册失败，请检查您的网络')
-    })
+  editTask ({commit}, task) {
+    if (!task) {
+      axios.post('/tasks/edit', {
+        id: state.selectedTask.id,
+        task: state.filledTask
+      })
+      .then(function (response) {
+        if (response.data.status === 1) {
+          commit('editAllTask')
+        }
+      })
+      .catch(function (response) {
+        console.log('注册失败，请检查您的网络')
+      })
+    } else {
+      axios.post('/tasks/edit', {
+        id: task.id,
+        task: task
+      })
+      .then(function (response) {
+        if (response.data.status === 1) {
+          commit('editAllTask')
+        }
+      })
+      .catch(function (response) {
+        console.log('注册失败，请检查您的网络')
+      })
+    }
   },
   cleanTask ({commit}) {
     commit('cleanTask')

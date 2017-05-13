@@ -26,6 +26,13 @@ router.route('/')
         })
         obj = [];
       }
+      console.log(type);
+      if (type == 'all') {
+        return res.send({
+          status: 1,
+          data: obj
+        })
+      }
       tasks = obj.filter(p => p[type] === val);
       return res.send({
         status: 1,
@@ -119,7 +126,8 @@ router.route('/edit')
       }
       var findObj = obj.find(p => p.id === id);
       if (findObj) {
-        findObj.task = task
+        findObj.task = task.task;
+        findObj.state = task.state;
       } else {
         return res.send({
           status: 0,

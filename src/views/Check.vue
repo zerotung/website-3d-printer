@@ -109,7 +109,10 @@ export default {
     }
   },
   mounted () {
-    this.fetchTask('username', this.user.username)
+    this.fetchTask({
+      type: 'username',
+      val: this.user.username
+    })
   }
 }
 </script>
